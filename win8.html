@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html><!--
+Copyright (c) 2025 Ji Luo
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"),
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software,
+and
+to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+The above copyright notice and this permission notice
+shall be included in all copies or substantial portions of the Software.
+https://www.bilibili.com/video/BV1FeGmzUEPX
+THE SOFTWARE IS PROVIDED "AS IS",
+WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH
+THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+--><head>
+<meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="SKYPE_TOOLBAR" content="SKYPE_TOOLBAR_PARSER_COMPATIBLE" />
+<meta name="IE_RM_OFF" content="true" />
+<style>
+*
+{
+  font-family: inherit;
+  -moz-box-sizing: inherit;
+  -webkit-box-sizing: inherit;
+  box-sizing: inherit;
+  -ms-high-contrast-adjust: inherit;
+}
+html
+{
+  -ms-high-contrast-adjust: auto;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+html, body
+{
+  font-size: 16px;
+  line-height: 1.6;
+  padding: 0;
+  margin: 0;
+}
+
+/*
+I consider there to be a bug in Chromium's implementation of view transition API.
+If I remove the "clipping rectangles" or skip setting their Z indices,
+then during the transition, Microsoft Edge 135.0.3179.85 (Official build) (64-bit)
+will show the background images and the tiles without clipping
+(i.e., they show out of the bounding box of ".immersive-launcher").
+The solid-colored cells/rows ensure those are hidden.
+*/
+
+.body-table { display: table; width: 100%; }
+.body-row { display: table-row; background: #ffffff; }
+.body-cell { display: table-cell; background: #ffffff; }
+.body-cell-top { height: 120px; }
+.body-cell-left { width: auto; }
+.body-cell-right { width: auto; }
+.body-cell-bottom { height: 20px; }
+.body-cell-clip1, .body-cell-clip2, .body-cell-clip3, .body-cell-clip4
+{
+  position: relative;
+  z-index: 2;
+}
+
+.computer-screen
+{
+  display: table-cell;
+  width: 1366px;
+  height: 768px;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+}
+
+/*
+The styling of Windows 8 immersive launcher is not precise.
+I simply looked at screenshots and looked up some colors.
+*/
+
+.immersive-launcher
+{
+  position: relative;
+  z-index: 1;
+  width: 1366px;
+  height: 768px;
+  user-select: none;
+  background-color: #180052;
+}
+.immersive-launcher.hidden-launcher { display: none; }
+.immersive-launcher-subject
+{
+  position: absolute;
+  z-index: 2;
+  left: 120px;
+  top: 56px;
+  width: 240px;
+  height: 56px;
+  line-height: 56px;
+  font-size: 48px;
+  font-family: 'Segoe UI Semilight', 'Segoe UI', sans-serif;
+  font-weight: 300;
+  color: #ffffff;
+}
+.immersive-launcher-user
+{
+  position: absolute;
+  z-index: 2;
+  right: 80px;
+  top: 56px;
+  height: 56px;
+}
+.immersive-launcher-avatar
+{
+  display: block;
+  float: right;
+  width: 56px;
+  height: 56px;
+}
+.immersive-launcher-name
+{
+  display: block;
+  float: left;
+  height: 56px;
+  padding-right: 12px;
+  font-family: 'Segoe UI Semilight', 'Segoe UI', sans-serif;
+  font-weight: 300;
+  text-align: right;
+  color: #ffffff;
+}
+.immersive-launcher-given-name
+{
+  display: block;
+  height: 28px;
+  line-height: 28px;
+  margin-bottom: 8px;
+  font-size: 28px;
+}
+.immersive-launcher-family-name
+{
+  display: block;
+  height: 20px;
+  line-height: 20px;
+  font-size: 16px;
+}
+.immersive-launcher-scrollable
+{
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  perspective: 1px;
+}
+.immersive-launcher-bg
+{
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -10px;
+  bottom: -10px;
+  transform: translateZ(-4px) scale(5);
+  width: 6830px;
+  background-image: url("file:///C:/Users/GL/OneDrive/Pictures/Windows 8 Images/10013.png");
+  background-position-x: 0;
+  background-position-y: 0;
+  background-repeat: repeat-x;
+}
+.immersive-launcher-fg
+{
+  position: absolute;
+  top: 0;
+  left: 120px;
+  padding-top: 168px;
+  height: 650px;
+}
+.tile-column
+{
+  width: 238px;
+  height: 100%;
+  padding-left: 80px;
+  column-width: 158px;
+  column-gap: 0;
+  column-rule-width: 0;
+  column-fill: auto;
+}
+.tile-square
+{
+  padding: 2px;
+  background: transparent;
+  width: 154px;
+  height: 154px;
+  margin: 0 84px 4px -80px;
+}
+.tile-square:hover
+{
+  background: rgba(255, 255, 255, 0.3);
+}
+/* Depending on where the tile is pressed, the effect is different! */
+.tile-pressed { transform: perspective(1px) scale(1.92) translateZ(-1px); transform-origin: center center; }
+.tile-pressed-n { transform: perspective(1px) rotateX(0.01deg) scale(2) translateZ(-1px); transform-origin: center bottom; }
+.tile-pressed-e { transform: perspective(1px) rotateY(0.01deg) scale(2) translateZ(-1px); transform-origin: left center; }
+.tile-pressed-w { transform: perspective(1px) rotateY(-0.01deg) scale(2) translateZ(-1px); transform-origin: right center; }
+.tile-pressed-s { transform: perspective(1px) rotateX(-0.01deg) scale(2) translateZ(-1px); transform-origin: center top; }
+.tile-pressed-ne { transform: perspective(1px) rotateX(0.01deg) rotateY(0.01deg) scale(2.04) translateZ(-1px); transform-origin: left bottom; }
+.tile-pressed-nw { transform: perspective(1px) rotateX(0.01deg) rotateY(-0.01deg) scale(2.04) translateZ(-1px); transform-origin: right bottom; }
+.tile-pressed-se { transform: perspective(1px) rotateX(-0.01deg) rotateY(0.01deg) scale(2.04) translateZ(-1px); transform-origin: left top; }
+.tile-pressed-sw { transform: perspective(1px) rotateX(-0.01deg) rotateY(-0.01deg) scale(2.04) translateZ(-1px); transform-origin: right top; }
+.tile-face
+{
+  width: 150px;
+  height: 150px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  margin: 0;
+  padding: 0;
+}
+.tile-shine
+{
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 6px;
+  background: linear-gradient(60deg, rgba(0, 0, 0, 0.1) 0%, rgba(255, 255, 255, 0.15) 100%);
+}
+.tile-icon
+{
+  width: 64px;
+  height: 64px;
+  margin: 21px auto;
+}
+.tile-subject
+{
+  height: 24px;
+  padding-left: 14px;
+  padding-top: 8px;
+  line-height: 16px;
+  font-size: 14px;
+  font-family: 'Segoe UI Semilight', 'Segoe UI', sans-serif;
+  font-weight: 300;
+}
+
+.immersive-app
+{
+  position: relative;
+  z-index: 1;
+  user-select: none;
+  width: 1366px;
+  height: 768px;
+}
+.immersive-app { display: none; }
+.immersive-app.active-app { display: block; }
+.immersive-app-splash
+{
+  position: absolute;
+  top: 234px;
+  left: 373px;
+  width: 620px;
+  height: 300px;
+}
+
+.tile-edge .tile-icon::after,
+.tile-message .tile-icon::after,
+.tile-store .tile-icon::after,
+.tile-people .tile-icon::after
+{
+  display: block;
+  height: 64px;
+  overflow: hidden;
+  font-size: 108px;
+  font-family:'Segoe UI', sans-serif;
+  font-weight: bold;
+  line-height: 32px;
+  text-align: center;
+}
+.app-edge .immersive-app-splash::after,
+.app-message .immersive-app-splash::after,
+.app-store .immersive-app-splash::after,
+.app-people .immersive-app-splash::after
+{
+  display: block;
+  margin-top: 50px;
+  height: 200px;
+  overflow: hidden;
+  font-size: 256px;
+  font-family:'Segoe UI', sans-serif;
+  font-weight: bold;
+  line-height: 128px;
+  text-align: center;
+}
+
+.tile-edge .tile-face, .app-edge { background: #1e90ff; color: #ffffff; }
+.tile-edge .tile-icon::after, .app-edge .immersive-app-splash::after { content: 'e'; }
+
+.tile-store .tile-face, .app-store { background: #008a00; color: #ffffff; }
+.tile-store .tile-icon::after, .app-store .immersive-app-splash::after { content: 's'; }
+
+.tile-message .tile-face, .app-message { background: #8c0095; color: #ffffff; }
+.tile-message .tile-icon::after, .app-message .immersive-app-splash::after { content: 'm'; }
+.tile-message .tile-icon::after { font-size: 72px; line-height: 52px; }
+
+.tile-people .tile-face, .app-people { background: #d24726; color: #ffffff; }
+.tile-people .tile-icon::after, .app-people .immersive-app-splash::after { content: 'p'; }
+.tile-people .tile-icon::after { font-size: 72px; }
+.app-people .immersive-app-splash::after { font-size: 200px; line-height: 160px; margin-top: 20px; padding-bottom: 20px; }
+
+.body-cell-clip1 { view-transition-name: launcher_clip1; }
+.body-cell-clip2 { view-transition-name: launcher_clip2; }
+.body-cell-clip3 { view-transition-name: launcher_clip3; }
+.body-cell-clip4 { view-transition-name: launcher_clip4; }
+.immersive-launcher { view-transition-name: launcher; }
+.immersive-launcher-subject { view-transition-name: launcher_subject; }
+.immersive-launcher-user { view-transition-name: launcher_user; }
+.immersive-launcher-bg { view-transition-name: launcher_bg; }
+.immersive-launcher-fg { view-transition-name: launcher_fg; }
+.active-tile { view-transition-name: activated_tile; }
+.active-app { view-transition-name: activated_app; }
+
+* { view-transition-capture-mode: flat; }
+:root { view-transition-name: none; --tiledx: 0px; --tiledy: 0px; }
+::view-transition-old(launcher),
+::view-transition-old(launcher_bg),
+::view-transition-old(launcher_clip1),
+::view-transition-old(launcher_clip2),
+::view-transition-old(launcher_clip3),
+::view-transition-old(launcher_clip4)
+{
+  animation-name: launcher-stay;
+  animation-duration: 400ms;
+  animation-timing-function: ease-out;
+}
+::view-transition-old(launcher_subject),
+::view-transition-old(launcher_user),
+::view-transition-old(launcher_fg)
+{
+  animation-name: launcher-fade-out;
+  animation-duration: 400ms;
+  animation-timing-function: ease-out;
+}
+::view-transition-old(activated_tile)
+{
+  animation-name: tile-flip;
+  animation-duration: 400ms;
+  animation-timing-function: ease-out;
+}
+::view-transition-new(activated_app)
+{
+  animation-name: app-display;
+  animation-duration: 400ms;
+  animation-timing-function: ease-out;
+}
+
+@keyframes launcher-stay
+{
+  0% { opacity: 1; }
+  100% { opacity: 1; }
+}
+@keyframes launcher-fade-out
+{
+  0% { opacity: 1; }
+  20% { opacity: 0; }
+  100% { opacity: 0; }
+}
+/*
+Logically the tile is the app window,
+but we cannot implement it like that.
+From 0% to 40%:
+- The tile flips half-way while enlarging and moving to the center.
+- The app window remains hidden.
+From 40% to 100%:
+- The tile is hidden.
+- The app window "completes" the flip while enlarging to full-screen. 
+The tile's required offset is computed right before the view transition starts.
+If we don't do that, the displacement is very visible, even to untrained eyes.
+It's fine to use compute() and CSS variables, because
+all browsers supporting view transition API also supports those.
+*/
+@keyframes tile-flip
+{
+  0% { visibility: visible; transform: translateX(0px) translateX(0px) rotateY(0deg) scaleX(1) scaleY(1); }
+  20% { visibility: visible; transform: translateX(calc(var(--tiledx) / 2)) translateY(calc(var(--tiledy) / 2)) rotateY(45deg) scaleX(1.732) scaleY(1.414); }
+  40% { visibility: visible; transform: translateX(var(--tiledx)) translateY(var(--tiledy)) rotateY(90deg) scaleX(0) scaleY(2); }
+  41% { visibility: hidden; transform: translateX(var(--tiledx)) translateY(var(--tiledy)) rotateY(90deg) scaleX(0) scaleY(2); }
+  100% { visibility: hidden; transform: translateX(var(--tiledx)) translateY(var(--tiledy)) rotateY(90deg) scaleX(0) scaleY(2); }
+}
+@keyframes app-display
+{
+  0% { visibility: hidden; }
+  39% { visibility: hidden; }
+  40% { visibility: visible; transform: perspective(1px) translateZ(-2px) rotateY(-0.02deg) scaleX(0) scaleY(1); transform-center: right center; }
+  75% { visibility: visible; transform: perspective(1px) translateZ(-1px) rotateY(-0.01deg) scaleX(0.891) scaleY(1.414); transform-center: right center; }
+  100% { visibility: visible; transform: perspective(1px) translateZ(0px) rotateY(0deg) scaleX(1) scaleY(1); transform-center: right center; }
+}
+</style>
+</head><body>
+<div class="body-table">
+<div class="body-row body-cell-clip1"><div class="body-cell"></div><div class="body-cell body-cell-top"></div><div class="body-cell"></div></div>
+<div class="body-row"><div class="body-cell body-cell-left body-cell-clip2"></div>
+<div class="computer-screen">
+<div class="immersive-launcher">
+<div class="immersive-launcher-subject">Start</div>
+<div class="immersive-launcher-user">
+<img class="immersive-launcher-avatar" width="56" height="56" src="file:///C:/Users/GL/OneDrive/Pictures/Windows 8 Images/user.png" />
+<div class="immersive-launcher-name">
+<span class="immersive-launcher-given-name">Irving</span>
+<span class="immersive-launcher-family-name">Bailiff</span>
+</div>
+</div>
+<div class="immersive-launcher-scrollable">
+<div class="immersive-launcher-bg"></div>
+<div class="immersive-launcher-fg">
+<div class="tile-column">
+  <!-- Horrible accessibility. Should be tabbable and handle Enter/Space activation. -->
+  <div class="tile-square tile-edge" data-app="edge"><div class="tile-face"><div class="tile-shine">
+    <div class="tile-icon"></div>
+    <div class="tile-subject">Spartan</div>
+  </div></div></div>
+  <div class="tile-square tile-store" data-app="store"><div class="tile-face"><div class="tile-shine">
+    <div class="tile-icon"></div>
+    <div class="tile-subject">Store</div>
+  </div></div></div>
+  <div class="tile-square tile-message" data-app="message"><div class="tile-face"><div class="tile-shine">
+    <div class="tile-icon"></div>
+    <div class="tile-subject">Messaging</div>
+  </div></div></div>
+  <div class="tile-square tile-people" data-app="people"><div class="tile-face"><div class="tile-shine">
+    <div class="tile-icon"></div>
+    <div class="tile-subject">People</div>
+  </div></div></div>
+</div>
+</div>
+</div>
+</div>
+<div class="immersive-app app-edge">
+  <div class="immersive-app-splash"></div>
+</div>
+<div class="immersive-app app-store">
+  <div class="immersive-app-splash"></div>
+</div>
+<div class="immersive-app app-message">
+  <div class="immersive-app-splash"></div>
+</div>
+<div class="immersive-app app-people">
+  <div class="immersive-app-splash"></div>
+</div>
+</div>
+<div class="body-cell body-cell-right body-cell-clip3"></div></div>
+<div class="body-row body-cell-clip4"><div class="body-cell"></div><div class="body-cell body-cell-bottom"></div><div class="body-cell"></div></div>
+</div>
+<script>
+(function (launcher, pressed_tile, pressed_effect, last_pressed_tile)
+{
+  'use strict';
+  function HidePressedEffect()
+  {
+    if (pressed_tile)
+    {
+      pressed_tile.classList.remove('tile-pressed');
+      pressed_tile.classList.remove('tile-pressed-n');
+      pressed_tile.classList.remove('tile-pressed-e');
+      pressed_tile.classList.remove('tile-pressed-w');
+      pressed_tile.classList.remove('tile-pressed-s');
+      pressed_tile.classList.remove('tile-pressed-ne');
+      pressed_tile.classList.remove('tile-pressed-nw');
+      pressed_tile.classList.remove('tile-pressed-se');
+      pressed_tile.classList.remove('tile-pressed-sw');
+    }
+  }
+  function ShowPressedEffect()
+  {
+    HidePressedEffect();
+    if (pressed_tile)
+    {
+      pressed_tile.classList.add(pressed_effect);
+    }
+  }
+  function KillPressedEffect()
+  {
+    HidePressedEffect();
+    pressed_tile = null;
+  }
+  function OnPointerDown(evt)
+  {
+    KillPressedEffect();
+    last_pressed_tile = null;
+    pressed_tile = document.elementFromPoint(evt.clientX, evt.clientY);
+    while (pressed_tile && !pressed_tile.classList.contains('tile-square'))
+    {
+      pressed_tile = pressed_tile.parentElement;
+    }
+    if (pressed_tile)
+    {
+      /* It's important to capture the pointer.
+      ** Otherwise, if pointer is leaves the launcher,
+      ** it'd be impossible to know whether:
+      ** - the pointer reenters without being released (the tile is still pressed), or
+      ** - the pointer is released outside, pressed outside, then re-enters pressed
+      **   (the tile is no longer pressed).
+      ** Capturing the pointer ensures it never "leaves" the launcher. */
+      launcher.setPointerCapture(evt.pointerId);
+      var tile_bounds = pressed_tile.getBoundingClientRect();
+      if (!(tile_bounds.width >= 1) || !(tile_bounds.height >= 1))
+      {
+        /* Why would this happen? It shouldn't. */
+        pressed_tile = null;
+        return;
+      }
+      last_pressed_tile = pressed_tile;
+      var sgn_x = 4 * (evt.clientX - tile_bounds.x) / tile_bounds.width - 2;
+      var sgn_y = 4 * (evt.clientY - tile_bounds.y) / tile_bounds.height - 2;
+      sgn_x = (sgn_x < -1 ? 'w' : sgn_x > 1 ? 'e' : '');
+      sgn_y = (sgn_y < -1 ? 'n' : sgn_y > 1 ? 's' : '');
+      pressed_effect = (sgn_x === '' && sgn_y === ''
+        ? 'tile-pressed'
+        : 'tile-pressed-' + sgn_y + sgn_x);
+      ShowPressedEffect();
+    }
+  }
+  function OnPointerUp(evt)
+  {
+    KillPressedEffect();
+  }
+  function OnPointerCancel(evt)
+  {
+    KillPressedEffect();
+  }
+  function OnClick(evt)
+  {
+    var clicked_tile = document.elementFromPoint(evt.clientX, evt.clientY);
+    while (clicked_tile && !clicked_tile.hasAttribute('data-app'))
+    {
+      clicked_tile = clicked_tile.parentElement;
+    }
+    if (clicked_tile && clicked_tile === last_pressed_tile)
+    {
+      /* It's important to check clicked_tile === last_pressed_tile,
+      ** because the launcher element is considered to be clicked,
+      ** even if the pointer is pressed on one tile and released on another,
+      ** because the launcher's event processing doesn't automatically
+      ** "see the tiles". */
+      var immersive_app = document.querySelector('.app-' + clicked_tile.getAttribute('data-app'));
+      var ActivateApp = (function ()
+      {
+        immersive_app.classList.add('active-app');
+        launcher.classList.add('hidden-launcher');
+      });
+      if (!document.startViewTransition ||
+        (window.matchMedia && window.matchMedia('(prefers-reduced-motion)').matches))
+      {
+        ActivateApp();
+        return;
+      }
+      var tile_bounds = clicked_tile.getBoundingClientRect();
+      var launcher_bounds = launcher.getBoundingClientRect();
+      var dx = (launcher_bounds.left + launcher_bounds.width / 2) - (tile_bounds.left + tile_bounds.width / 2);
+      var dy = (launcher_bounds.top + launcher_bounds.height / 2) - (tile_bounds.top + tile_bounds.height / 2);
+      document.documentElement.style.setProperty('--tiledx', dx.toString() + 'px');
+      document.documentElement.style.setProperty('--tiledy', dy.toString() + 'px');
+      clicked_tile.classList.add('active-tile');
+      document.startViewTransition(ActivateApp);
+    }
+  }
+  launcher.onpointerdown = OnPointerDown;
+  launcher.onpointerup = OnPointerUp;
+  launcher.onpointercancel = OnPointerCancel;
+  launcher.onclick = OnClick;
+})(document.querySelector('.immersive-launcher'));
+</script>
+<script>
+(function (elt)
+{
+  'use strict';
+  for (var i = 0; i < 6; ++i)
+    elt.innerHTML = elt.innerHTML + elt.innerHTML;
+})(document.querySelector('.tile-square').parentElement);
+</script>
+</body></html>
